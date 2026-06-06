@@ -1,6 +1,8 @@
 const e = require("express");
 const User = require("../models/userModel")
 const bcrypt = require("bcryptjs");
+const transporter = require("../config/mailSender") // for sending mail
+const otpService = require("../services/otpService")
 
 
 // Register User
@@ -31,6 +33,12 @@ exports.registerUser = async (req, res) => {
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
+
+// otp verification to knmow its verified used if register and if they login tomorrow if verified then only need to give them login
+//created otp service to generate and send mail and return otp so we can use anywhere
+        const otp =await otpService.generateOtp(email);
+
+        // user created temp will store otp and expiry
         const userSaved = await User.create({
             firstName,
             lastName,
@@ -38,12 +46,20 @@ exports.registerUser = async (req, res) => {
             password: hashPassword,
             countrycode,
             phoneNumber,
-            role
+            role,
+            otp,
+            otpExpires: Date.now() + 10 * 60 * 1000
         })
+
+
+        // to not show otp and password in response
+        userSaved.password = undefined;
+        userSaved.otp = undefined;
+        userSaved.otpExpires = undefined;
 
         res.status(201).json({
             success: true,
-            message: `Signed Up successfully and user Created.`,
+            message: `Please verify email with Otp Sent to registered email.`,
             user: userSaved
         })
     } catch (error) {
@@ -59,6 +75,7 @@ exports.registerUser = async (req, res) => {
 
 }
 
+
 // Login User
 
 exports.loginUser = async (req, res) => {
@@ -73,7 +90,7 @@ exports.loginUser = async (req, res) => {
             })
         }
 
-        const existingUser = await User.findOne({ email }).select("+password"); 
+        const existingUser = await User.findOne({ email }).select("+password");
         // as in schema we select false so it will not give password we need to .select('+password') to get the password this tells mongodb to explicitly give password
 
         if (!existingUser) {
@@ -81,6 +98,13 @@ exports.loginUser = async (req, res) => {
                 success: false,
                 message: `User not exists with the email ${email}. Please register..`
             })
+        }
+
+        if (!existingUser.emailVerified) {
+            return res.status(401).json({
+                success: false,
+                message: "Please verify your email first"
+            });
         }
         const passwordMatch = await bcrypt.compare(password, existingUser.password);
 
@@ -117,3 +141,103 @@ exports.loginUser = async (req, res) => {
     }
 
 }
+
+
+
+// verify Otp Controller 
+
+exports.verifyEmail = async (req, res) => {
+
+    try {
+        const { email, otp } = req.body;
+        
+        const existingUser = await User.findOne({ email }).select("+otp +otpExpires");
+
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (existingUser.otp !== otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP"
+            });
+        }
+        if (existingUser.otpExpires < Date.now()) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP expired"
+            });
+        }
+
+        existingUser.emailVerified = true;
+        existingUser.otp = undefined;
+        existingUser.otpExpires = undefined;
+
+        await existingUser.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully"
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
+
+// Resend OTP 
+
+exports.resendOTP = async (req, res) => {
+
+    try {
+
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (user.emailVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already verified"
+            });
+        }
+
+        const otp = await otpService.generateOtp(email)
+
+        user.otp = otp;
+        user.otpExpires =
+            Date.now() + 10 * 60 * 1000;
+
+        await user.save();
+
+
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent successfully"
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};

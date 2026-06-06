@@ -5,12 +5,12 @@ const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
-        maxlength: 10
+        maxlength: 30
     },
     lastName: {
         type: String,
         required: true,
-        maxlength: 10
+        maxlength: 50
     },
     email: {
         type: String,
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     countrycode: {
         type: String,
         required: [true, "Please select country code"],
-        default:'+91',
+        default: '+91',
 
 
     },
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         match: [/^[0-9]{10}$/, "Please enter a valid 10-digit phone number"],
-        
+
     },
     password: {
         type: String,
@@ -46,8 +46,23 @@ const userSchema = new mongoose.Schema({
         enum: ['Instructor', 'Student', 'Admin'],
         default: 'Student'
     },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    otp: {
+        type: String,
+        select:false
+    },
+
+    otpExpires: {
+        type: Date,
+        select:false
+    }
+
 },
     { timestamps: true }
 );
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('USER', userSchema)
