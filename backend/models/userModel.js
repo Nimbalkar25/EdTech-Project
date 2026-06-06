@@ -18,11 +18,18 @@ const userSchema = new mongoose.Schema({
         unique: true,
         validate: [validator.isEmail, "Please enter a valid email address"],
     },
+    countrycode: {
+        type: String,
+        required: [true, "Please select country code"],
+        default:'+91',
+
+
+    },
     phoneNumber: {
-        type: Number,
+        type: String,
         required: true,
-        maxlength: 10,
-        minlength: 10
+        match: [/^[0-9]{10}$/, "Please enter a valid 10-digit phone number"],
+        
     },
     password: {
         type: String,

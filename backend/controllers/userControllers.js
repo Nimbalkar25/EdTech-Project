@@ -1,9 +1,12 @@
+const e = require("express");
 const User = require("../models/userModel")
 const bcrypt = require("bcryptjs");
 
+
+// Register User
 exports.registerUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, phoneNumber, password, confirmPassword, role } = req.body;
+        const { firstName, lastName, email, countrycode, phoneNumber, password, confirmPassword, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -15,7 +18,7 @@ exports.registerUser = async (req, res) => {
 
         if (!password || !confirmPassword) {
             return res.status(400).json({
-                success:false,
+                success: false,
                 message: "Please enter password and confirm password"
             });
         }
@@ -33,6 +36,7 @@ exports.registerUser = async (req, res) => {
             lastName,
             email,
             password: hashPassword,
+            countrycode,
             phoneNumber,
             role
         })
@@ -52,5 +56,64 @@ exports.registerUser = async (req, res) => {
 
     }
 
+
+}
+
+// Login User
+
+exports.loginUser = async (req, res) => {
+    try {
+
+        const { role, email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(404).json({
+                success: false,
+                message: "Please enter Email and Password"
+            })
+        }
+
+        const existingUser = await User.findOne({ email }).select("+password"); 
+        // as in schema we select false so it will not give password we need to .select('+password') to get the password this tells mongodb to explicitly give password
+
+        if (!existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: `User not exists with the email ${email}. Please register..`
+            })
+        }
+        const passwordMatch = await bcrypt.compare(password, existingUser.password);
+
+        if (!passwordMatch) {
+            return res.status(400).json({
+                success: false,
+                message: `Wrong Password. Please enter correct password.`
+            })
+        }
+
+        if (role !== existingUser.role) {
+            return res.status(400).json({
+                success: false,
+                message: `Role is mismatched Select correct role.`
+            })
+
+        }
+
+        existingUser.password = undefined; // to not give password to anyone 
+        res.status(200).json({
+            success: true,
+            message: `Login Successfully. Welcome to StudyNotion...`,
+            data: existingUser
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Errror while Login..."
+        })
+
+    }
 
 }
