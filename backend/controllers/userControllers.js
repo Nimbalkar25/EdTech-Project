@@ -34,7 +34,7 @@ exports.registerUser = async (req, res) => {
 
         const hashPassword = await bcrypt.hash(password, 10);
 
-// otp verification to knmow its verified used if register and if they login tomorrow if verified then only need to give them login
+// otp verification to know its verified used if register and if they login tomorrow if verified then only need to give them login
 //created otp service to generate and send mail and return otp so we can use anywhere
         const otp =await otpService.generateOtp(email);
 
@@ -222,7 +222,7 @@ exports.resendOTP = async (req, res) => {
 
         user.otp = otp;
         user.otpExpires =
-            Date.now() + 10 * 60 * 1000;
+            Date.now() + 5 * 60 * 1000;
 
         await user.save();
 

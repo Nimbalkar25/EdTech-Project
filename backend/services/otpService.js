@@ -43,7 +43,7 @@ exports.generateOtp = async (email) => {
         </div>
     
         <p>
-            This OTP is valid for <strong>10 minutes</strong>.
+            This OTP is valid for <strong>5 minutes</strong>.
         </p>
     
         <p>
