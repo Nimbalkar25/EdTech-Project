@@ -20,32 +20,41 @@ const courseSchema = new mongoose.Schema({
     },
 
     category: {
-        type:String,
+        type: String,
         required: true
     },
 
     tags: [
         {
             type: String,
-            required:true
+            required: true
         }
     ],
 
     courseThumbnail: {
-        type: String,
+
+        url: {
+            type: String,
+            required: true,
+        },
+        public_id: {
+            type: String,
+            required: true,
+        }
+
     },
 
 
     benefitsOfCourse:
     {
         type: String,
-        required:true
+        required: true
     },
 
     requirements: [
         {
             type: String,
-            required:true
+            required: true
 
         }
     ],

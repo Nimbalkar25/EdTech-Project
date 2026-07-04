@@ -1,4 +1,9 @@
 const Course = require("../models/courseModel");
+const SECTION = require("../models/sectionModel");
+const SUBSECTION = require("../models/subSectionModel");
+const RATINGANDREVIEW = require("../models/ratingAndReviewsModel");
+const cloudinary = require("cloudinary").v2
+
 
 const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
 
@@ -47,7 +52,10 @@ exports.createCourse = async (req, res) => {
             benefitsOfCourse,
             requirements,
             instructor: instructorId,
-            courseThumbnail: uploadedThumbnail.secure_url
+            courseThumbnail: {
+                url: uploadedThumbnail.secure_url,
+                public_id: uploadedThumbnail.public_id
+            }
         })
 
         return res.status(200).json({
@@ -80,7 +88,7 @@ exports.getCourses = async (req, res) => {
             })
         }
 
-        if(courses.length === 0){
+        if (courses.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: `No Courses Available`
@@ -133,7 +141,6 @@ exports.getCourseById = async (req, res) => {
 
 
 // create section
-const SECTION = require("../models/sectionModel");
 exports.createSection = async (req, res) => {
     try {
 
@@ -183,7 +190,6 @@ exports.createSection = async (req, res) => {
 }
 
 // subsection
-const SUBSECTION = require("../models/subSectionModel");
 exports.createSubSection = async (req, res) => {
     try {
 
@@ -218,7 +224,12 @@ exports.createSubSection = async (req, res) => {
             );
 
         const createdsubSection = await SUBSECTION.create({
-            title, description, timeDuration, videoUrl: uploadedThumbnail.secure_url
+            title, description, timeDuration,
+             videoUrl: {
+                url: uploadedThumbnail.secure_url,
+                public_id: uploadedThumbnail.public_id
+
+            }
         })
 
 
@@ -304,12 +315,18 @@ exports.deleteCourse = async (req, res) => {
         if (!courseId) {
             return res.status(404).json({
                 success: false,
-                message: `Please enter CourseId`
+                message: "Please provide Course ID"
             })
         }
 
-        const course = await Course.findById(courseId);
-        console.log(course);
+        // Find Course with Sections and SubSections
+        const course = await Course.findById(courseId)
+            .populate({
+                path: "courseSection",
+                populate: {
+                    path: "subSections"
+                }
+            });
 
         if (!course) {
             return res.status(404).json({
@@ -319,13 +336,56 @@ exports.deleteCourse = async (req, res) => {
 
         }
 
+        // --------------------------------------------------
+        // Delete Course Thumbnail from Cloudinary (Optional)
+        // --------------------------------------------------
+        await cloudinary.uploader.destroy(course.courseThumbnail.public_id);
+
+        // --------------------------------------------------
+        // Delete all SubSections
+        // --------------------------------------------------
+        for (const section of course.courseSection) {
+
+            // Delete Videos from Cloudinary (Optional)
+            for (const lecture of section.subSections) {
+                await cloudinary.uploader.destroy(lecture.videoUrl.public_id);
+            }
+
+            await SUBSECTION.deleteMany({
+                _id: {
+                    $in: section.subSections
+                }
+            });
+
+        }
+
+        // --------------------------------------------------
+        // Delete all Sections
+        // --------------------------------------------------
+        await SECTION.deleteMany({
+            _id: {
+                $in: course.courseSection
+            }
+        });
+
+        // --------------------------------------------------
+        // Delete all Ratings & Reviews
+        // --------------------------------------------------
+        await RATINGANDREVIEW.deleteMany({
+            _id: {
+                $in: course.ratingAndReviews
+            }
+        });
+
+        // --------------------------------------------------
+        // Delete Course
+        // --------------------------------------------------
         await Course.findByIdAndDelete(courseId);
 
         return res.status(200).json({
-            success:true,
-            message:`Course ${course.courseTitle} Deleted Successfully`,
-            data:course
-        })
+            success: true,
+            message: `${course.courseTitle} deleted successfully`
+        });
 
     } catch (error) {
         return res.status(500).json({
