@@ -1,5 +1,5 @@
 const User = require("../models/userModel")
-const { sendResetPasswordLink } = require("../services/resetPasswordLink");
+const { sendResetPasswordLink } = require("../utils/resetPasswordLink");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 

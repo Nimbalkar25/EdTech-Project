@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema({
         enum: ['Instructor', 'Student', 'Admin'],
         default: 'Student'
     },
+    courses: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "COURSE"
+        }
+    ],
     emailVerified: {
         type: Boolean,
         default: false
@@ -53,19 +59,19 @@ const userSchema = new mongoose.Schema({
 
     otp: {
         type: String,
-        select:false
+        select: false
     },
 
     otpExpires: {
         type: Date,
-        select:false
+        select: false
     },
-    resetPasswordToken:{
-        type:String,
-        select:false
+    resetPasswordToken: {
+        type: String,
+        select: false
     },
-    resetPasswordExpires:{
-        type:Date,
+    resetPasswordExpires: {
+        type: Date,
     }
 
 },

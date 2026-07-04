@@ -2,7 +2,8 @@ const e = require("express");
 const User = require("../models/userModel")
 const bcrypt = require("bcryptjs");
 const transporter = require("../config/mailSender") // for sending mail
-const otpService = require("../services/otpService")
+const otpService = require("../utils/otpService");
+const {generateToken} = require("../utils/tokenService")
 
 
 // Register User
@@ -60,7 +61,7 @@ exports.registerUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: `Please verify email with Otp Sent to registered email.`,
-            user: userSaved
+            data: userSaved
         })
     } catch (error) {
         console.log(error);
@@ -123,10 +124,13 @@ exports.loginUser = async (req, res) => {
 
         }
 
+        const token =  await generateToken(existingUser,"7d");
+
         existingUser.password = undefined; // to not give password to anyone 
         res.status(200).json({
             success: true,
             message: `Login Successfully. Welcome to StudyNotion...`,
+            token,
             data: existingUser
         })
 
