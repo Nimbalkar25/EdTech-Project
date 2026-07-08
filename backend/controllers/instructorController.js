@@ -5,7 +5,7 @@ const RATINGANDREVIEW = require("../models/ratingAndReviewsModel");
 const cloudinary = require("cloudinary").v2
 
 
-const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/uploadToCloudinary");
 
 
 exports.createCourse = async (req, res) => {
@@ -22,7 +22,7 @@ exports.createCourse = async (req, res) => {
 
         } = req.body;
 
-        const instructorId = await req.user.id;
+        const instructorId = req.user.id;
 
         const existingCourse = await Course.findOne({
             courseTitle
@@ -33,6 +33,14 @@ exports.createCourse = async (req, res) => {
                 success: false,
                 message: "Course is already present with same Title."
             })
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Thumbnail is required"
+            });
         }
 
 
@@ -81,13 +89,6 @@ exports.getCourses = async (req, res) => {
 
         const courses = await Course.find().populate("courseSection");
 
-        if (!courses) {
-            return res.status(404).json({
-                success: false,
-                message: `Not able to Fetch Courses`
-            })
-        }
-
         if (courses.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -116,7 +117,12 @@ exports.getCourseById = async (req, res) => {
 
         const { courseId } = req.params;
 
-        const course = await Course.find({ courseId }).populate("courseSection");
+        const course = await Course.findById(courseId).populate({
+            path: "courseSection",
+            populate: {
+                path: "subSections"
+            }
+        }).populate("ratingAndReviews");
 
         if (!course) {
             return res.status(404).json({
@@ -144,7 +150,8 @@ exports.getCourseById = async (req, res) => {
 exports.createSection = async (req, res) => {
     try {
 
-        const { courseId, sectionName } = req.body;
+        const { courseId } = req.params;
+        const { sectionName } = req.body;
         const course = await Course.findById(courseId).populate("courseSection");
 
         if (!course) {
@@ -154,13 +161,13 @@ exports.createSection = async (req, res) => {
             });
         }
 
-        const existingSection = await course.courseSection.find(
-            sec => sec.sectionName === sectionName
+        const existingSection = course.courseSection.find(
+            sec => sec.sectionName.trim().toLowerCase() === sectionName.trim().toLowerCase()
         );
 
 
         if (existingSection) {
-            return res.status(400).json({
+            return res.status(409).json({
                 success: true,
                 error: `Section already present.`
             })
@@ -175,9 +182,10 @@ exports.createSection = async (req, res) => {
         })
 
 
-        return res.status(200).json({
+        return res.status(201).json({
             success: true,
-            data: createdSection
+            message: `Section Created Successfully`,
+            data: createdSection,
         })
 
     } catch (error) {
@@ -193,7 +201,13 @@ exports.createSection = async (req, res) => {
 exports.createSubSection = async (req, res) => {
     try {
 
-        const { sectionId, title, description, timeDuration } = req.body;
+        const { sectionId } = req.params;
+
+        const {
+            title,
+            description,
+            timeDuration
+        } = req.body;
 
         const exisitingSection = await SECTION.findById(sectionId).populate("subSections");
 
@@ -205,19 +219,28 @@ exports.createSubSection = async (req, res) => {
         }
 
 
-        const existingsubSection = await exisitingSection.subSections.find(
-            sec => sec.title === title
+        const existingsubSection = exisitingSection.subSections.find(
+            sub => sub.title.trim().toLowerCase() ===
+                title.trim().toLowerCase()
         );
 
 
         if (existingsubSection) {
-            return res.status(400).json({
+            return res.status(409).json({
                 success: true,
                 error: `subSection already present with the same title.`
             })
         }
 
-        const uploadedThumbnail =
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Thumbnail is required"
+            });
+        }
+
+        const uploadedVideo =
             await uploadToCloudinary(
                 req.file,
                 `${process.env.FOLDER_NAME}/${process.env.VIDEOS_FOLDER}`
@@ -225,9 +248,9 @@ exports.createSubSection = async (req, res) => {
 
         const createdsubSection = await SUBSECTION.create({
             title, description, timeDuration,
-             videoUrl: {
-                url: uploadedThumbnail.secure_url,
-                public_id: uploadedThumbnail.public_id
+            videoUrl: {
+                url: uploadedVideo.secure_url,
+                public_id: uploadedVideo.public_id
 
             }
         })
@@ -262,7 +285,7 @@ exports.createSubSection = async (req, res) => {
 // publish course
 exports.updateCourseStatus = async (req, res) => {
     try {
-        const { courseId } = req.body;
+        const { courseId } = req.params;
         if (!courseId) {
             return res.status(404).json({
                 success: false,
@@ -279,7 +302,7 @@ exports.updateCourseStatus = async (req, res) => {
             })
         };
 
-        if (existingCourse.status = "Published") {
+        if (existingCourse.status === "Published") {
             return res.status(400).json({
                 success: false,
                 message: `Course is already Published.`
@@ -288,6 +311,8 @@ exports.updateCourseStatus = async (req, res) => {
         }
 
         existingCourse.status = "Published";
+
+        await existingCourse.save();
 
         return res.status(200).json({
             success: true,
@@ -306,7 +331,204 @@ exports.updateCourseStatus = async (req, res) => {
 }
 
 
-// edit Course
+
+// edit course
+
+exports.editCourse = async (req, res) => {
+    try {
+
+        const { courseId } = req.params;
+        const {
+            courseTitle,
+            courseShortDescription,
+            price,
+            category,
+            tags,
+            benefitsOfCourse,
+            requirements,
+        } = req.body;
+
+        const instructorId = req.user.id;
+
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course Not Found."
+            })
+        }
+
+        if (course.instructor.toString() !== instructorId) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to edit this course."
+            });
+        }
+
+        if (req.file) {
+
+            await cloudinary.uploader.destroy(
+                course.courseThumbnail.public_id
+            );
+
+            const uploadedThumbnail =
+                await uploadToCloudinary(
+                    req.file,
+                    `${process.env.FOLDER_NAME}/${process.env.COURSE_THUMBNAIL_FOLDER}`
+                );
+
+            course.courseThumbnail = {
+                url: uploadedThumbnail.secure_url,
+                public_id: uploadedThumbnail.public_id
+            };
+        }
+
+        course.courseTitle = courseTitle;
+        course.courseShortDescription = courseShortDescription;
+        course.price = price;
+        course.category = category;
+        course.tags = tags;
+        course.benefitsOfCourse = benefitsOfCourse;
+        course.requirements = requirements;
+
+        await course.save();
+
+
+        return res.status(200).json({
+            success: true,
+            message: `Course Updated Succesfully.`,
+            data: course
+        })
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Error while Editing course.."
+        })
+    }
+}
+
+exports.editSection = async (req, res) => {
+    try {
+        const { sectionId, courseId } = req.params;
+        const { sectionName } = req.body;
+        const instructorId = req.user.id;
+
+        const course = await Course.findById(courseId);
+
+        const section = await SECTION.findById(sectionId);
+
+        if (!section) {
+            return res.status(404).json({
+                success: false,
+                message: `Section Not found`
+            })
+        }
+
+
+        if (course.instructor.toString() !== instructorId) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to edit this course."
+            });
+        }
+
+
+        if (sectionName) {
+            section.sectionName = sectionName
+            await section.save();
+
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Section updated Successfully.`,
+            data: section
+        })
+
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `Error while editing Section.`
+        })
+    }
+}
+
+exports.editSubSection = async (req, res) => {
+    try {
+        const { subSectionId, courseId } = req.params;
+        const {
+            title,
+            description,
+            timeDuration
+        } = req.body;
+
+        const instructorId = req.user.id;
+
+        const course = await Course.findById(courseId);
+        const subSection = await SUBSECTION.findById(subSectionId);
+        if (!subSection) {
+            return res.status(404).json({
+                success: false,
+                message: `SubSection Not found`
+            })
+        }
+
+        if (course.instructor.toString() !== instructorId) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to edit this course."
+            });
+        }
+
+
+
+        if (req.file) {
+
+            await cloudinary.uploader.destroy(
+                subSection.videoUrl.public_id
+            );
+
+            const uploadedVideo =
+                await uploadToCloudinary(
+                    req.file,
+                    `${process.env.FOLDER_NAME}/${process.env.VIDEOS_FOLDER}`
+                );
+
+            subSection.videoUrl = {
+                url: uploadedVideo.secure_url,
+                public_id: uploadedVideo.public_id
+            };
+        }
+
+        subSection.title = title;
+        subSection.description = description;
+        subSection.timeDuration = timeDuration;
+
+        await subSection.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `SubSection updated Successfully.`,
+            data: subSection
+        })
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Error while Editing subSection.."
+        })
+    }
+}
+
+
+// delete Course
 
 exports.deleteCourse = async (req, res) => {
     try {
@@ -339,7 +561,9 @@ exports.deleteCourse = async (req, res) => {
         // --------------------------------------------------
         // Delete Course Thumbnail from Cloudinary (Optional)
         // --------------------------------------------------
-        await cloudinary.uploader.destroy(course.courseThumbnail.public_id);
+        // Thumbnail
+        await deleteFromCloudinary(course.courseThumbnail.public_id);
+
 
         // --------------------------------------------------
         // Delete all SubSections
@@ -347,8 +571,11 @@ exports.deleteCourse = async (req, res) => {
         for (const section of course.courseSection) {
 
             // Delete Videos from Cloudinary (Optional)
-            for (const lecture of section.subSections) {
-                await cloudinary.uploader.destroy(lecture.videoUrl.public_id);
+            for (const subSection of section.subSections) {
+                await deleteFromCloudinary(
+                    subSection.videoUrl.public_id,
+                    "video"
+                );
             }
 
             await SUBSECTION.deleteMany({
@@ -392,7 +619,65 @@ exports.deleteCourse = async (req, res) => {
             success: false,
             error: error.message,
             message: "Error while Deleting course.."
-        })
+        });
 
     }
 }
+
+// delete section
+
+exports.deleteSection = async (req, res) => {
+    try {
+
+        const { sectionId } = req.params;
+
+        if (!sectionId) {
+            return res.status(404).json({
+                success: false,
+                message: `Section Id is not present...`
+            })
+        }
+
+        const section = await SECTION.findById(sectionId).populate("subSections");
+
+        if (!section) {
+            return res.status(404).json({
+                success: false,
+                error: error.message,
+                message: "Section Not Found.."
+            })
+        }
+
+        // delete the video or image from cloudinary 
+        for (const subSection of section.subSections) {
+            await deleteFromCloudinary(
+                subSection.videoUrl.public_id,
+                "video"
+            );
+        }
+
+        // delete the all subsection under section now
+        await SUBSECTION.deleteMany({
+            _id: {
+                $in: section.subSections
+            }
+        });
+
+        // now delete the section
+        await SECTION.findByIdAndDelete(sectionId);
+
+        return res.status(200).json({
+            success: true,
+            message: `Section deleted Successfully..`
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Error while Deleting Section.."
+        })
+    }
+}
+
+// delete Subsection

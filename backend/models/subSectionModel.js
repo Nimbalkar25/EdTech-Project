@@ -11,10 +11,12 @@ new mongoose.Schema({
     },
 
     description:{
-        type:String
+        type:String,
+        required:true
     },
 
     videoUrl:{
+        
          url: {
             type: String,
             required: true,
@@ -22,11 +24,12 @@ new mongoose.Schema({
         public_id: {
             type: String,
             required: true,
-        }
+        },
     },
 
     timeDuration:{
-        type:String
+        type:Number,
+        required:true
     }
 
 },{

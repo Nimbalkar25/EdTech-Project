@@ -8,9 +8,19 @@ exports.uploadToCloudinary = async (file, folder) => {
     const response =
         await cloudinary.uploader.upload(
             base64String,
-            {folder}
+            { folder }
         );
 
     return response;
 
 }
+
+
+exports.deleteFromCloudinary = async (
+    publicId,
+    resourceType = "image"
+) => {
+    return await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType
+    });
+};

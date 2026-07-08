@@ -5,15 +5,11 @@ async (req, res, next) => {
 
     try {
 
+        // No file? Just continue.
         if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Thumbnail is required"
-            });
+            return next();
         }
-
-
+        
         const fileSizeMB =
             req.file.size /
             (1024 * 1024);
@@ -34,7 +30,6 @@ async (req, res, next) => {
                 req.file.buffer
             ).metadata();
 
-            console.log(metadata);
 
         const ratio =
             metadata.width /

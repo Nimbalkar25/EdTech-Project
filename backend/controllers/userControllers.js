@@ -64,7 +64,6 @@ exports.registerUser = async (req, res) => {
             data: userSaved
         })
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             success: false,
             error: error.message,
@@ -135,7 +134,6 @@ exports.loginUser = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             success: false,
             error: error.message,
@@ -245,3 +243,6 @@ exports.resendOTP = async (req, res) => {
 
     }
 };
+
+
+
