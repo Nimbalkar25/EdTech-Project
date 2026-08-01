@@ -46,6 +46,15 @@ exports.resetPassword = async (req, res) => {
 
         const { newPassword, confirmPassword } = req.body;
 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if(!passwordRegex.test(newPassword)){
+            return res.status(400).json({
+                success:false,
+                message:`Password must contain at least 1 uppercase letter, 1 lowercase letter and 1 number and length atleast 8`
+            })
+        }
+
 
         const existingUser = await User.findOne({
             resetPasswordToken: token

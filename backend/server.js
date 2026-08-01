@@ -10,11 +10,13 @@ const dbConnect = require("./config/db");
 const {cloudinaryConnect} = require("./config/cloudinary")
 const userRoutes = require("./routes/userRoutes")
 const instructorRoutes = require("./routes/instructorRoutes")
+const studentRoutes = require("./routes/studentRoutes")
 dbConnect();
 cloudinaryConnect();
 app.use(cors());
 app.use("/edtech",userRoutes);
 app.use("/edtech/instructor",instructorRoutes);
+app.use("/edtech/student",studentRoutes);
 
 app.listen(PORT,()=>{
     console.log(`Server running on ${PORT}`)

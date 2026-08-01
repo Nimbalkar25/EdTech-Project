@@ -19,7 +19,7 @@ const { validateVideoAndThumbnail } = require("../middleware/videoThumnail");
 const upload = require("../middleware/multer");
 
 //get request for courses 
-router.get("/course/getCourses", isAuthenticated, isInstructor, getCourses);
+router.get("/course/getCourses", isAuthenticated, getCourses);
 
 // get request use for fetch course to edi and also to fetch particular course also no need different api 
 router.get("/course/getCourse/:courseId", isAuthenticated, getCourseById);

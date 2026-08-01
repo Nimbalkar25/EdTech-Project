@@ -46,6 +46,39 @@ const userSchema = new mongoose.Schema({
         enum: ['Instructor', 'Student', 'Admin'],
         default: 'Student'
     },
+    avatar: {
+        url: {
+            type: String,
+            default: ""
+        },
+        public_id: {
+            type: String,
+            default: ""
+        }
+    },
+    displayName: {
+        type: String
+    },
+
+    about: {
+        type: String,
+        default: ""
+    },
+
+    profession: {
+        type: String,
+        default: ""
+    },
+
+    gender: {
+        required:true,
+        type: String,
+        enum: ["Male", "Female", "Other"]
+    },
+
+    dateOfBirth: {
+        type: Date
+    },
     courses: [
         {
             type: mongoose.Schema.Types.ObjectId,
