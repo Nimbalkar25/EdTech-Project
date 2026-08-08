@@ -1,0 +1,1088 @@
+{
+  "info": {
+    "_postman_id": "398f359d-3b44-441b-a590-aa3e4bcbb8e6",
+    "name": "Ed-Tech",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42916547"
+  },
+  "item": [
+    {
+      "name": "UserRoutes",
+      "item": [
+        {
+          "name": "Register user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGZjYzAxYzQ2MzNmOGI1NmFkM2MwZiIsImVtYWlsIjoiYmFkaGFocXNAYXMuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzc2Mjc0NDQ0LCJleHAiOjE3NzYyNzQ1MDR9.eVYAsAHCqhaS1ujuTcxeE4GpMNKuTiJDILQTdI1ec-Q",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n    \"firstName\": \"assa\",\r\n    \"lastName\": \"sas\",\r\n    \"email\": \"rtgrgrgr@gmail.com\",\r\n    \"phoneNumber\": \"7547575757\",\r\n    \"password\": \"Dev@da\",\r\n    \"confirmPassword\": \"Dev@dadad\",\r\n    \"role\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/signup",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"role\": \"Student\",\r\n    \"email\": \"sasa@gmail.com\",\r\n    \"password\":\"Dev@adsadad\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/login",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sasas@gmail.com\",\r\n    \"otp\":\"993141\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/verify-otp",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "verify-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"sasas@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/resend-otp",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "resend-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password Link",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\r\n    \"email\":\"sasasa@gmail.com\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/reset-passwordLink",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "reset-passwordLink"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newPassword\" : \"Dev@fsfsfsfsf\",\r\n    \"confirmPassword\" : \"Devfsfsfsf@fs\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/reset-password/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQzZGM5NWQxZDA0ZTNmZWZkZWI5MiIsImVtYWlsIjoiY3JhZnRmb282NkBnbWFpbC5jb20iLCJpYXQiOjE3ODE3MTM0MTYsImV4cCI6MTc4MTcxMzcxNn0.LymyJw2RFiK1ZiKU-5iZqUavEV9AU_MYl8Nxj0ImJGc",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "reset-password",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQzZGM5NWQxZDA0ZTNmZWZkZWI5MiIsImVtYWlsIjoiY3JhZnRmb282NkBnbWFpbC5jb20iLCJpYXQiOjE3ODE3MTM0MTYsImV4cCI6MTc4MTcxMzcxNn0.LymyJw2RFiK1ZiKU-5iZqUavEV9AU_MYl8Nxj0ImJGc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjRiZDdjNzAyYmQxZGQwNjk2NTU3ZCIsImVtYWlsIjoiZ2FuZXNoS2FyYW5kZUBnbWFpbC5jb20iLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc4NTA3NzUxOCwiZXhwIjoxNzg1NjgyMzE4fQ.pIZG3ZF99O9pbNuJplSyamAVt0Y4qVLUTnAel-IKvWI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:4000/edtech/profile/me",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "profile",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Avatar of User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MzUyMTgzNCwiZXhwIjoxNzg0MTI2NjM0fQ.H5cEuIiOf8s9YD7UN0sIxTcnhC1QHcKQS-DIkgI_MhA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "uuid": "78d5a468-07f5-4235-af1d-b06a5c7f7416",
+                  "src": "postman-cloud:///1f17d591-777b-4b00-a77c-6a227af210d8"
+                }
+              ]
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/edit/avatar",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "edit",
+                "avatar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4Mzc5NjI4MCwiZXhwIjoxNzg0NDAxMDgwfQ.QDK8Dcfk40nXJoDLb7AFZfv2VXxGpv99U0OUofDHssY",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\":\"Dev@dsd\",\r\n    \"changePassword\":\"Dev@dsdsd\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/edit/profile",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "edit",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Instructor Routes",
+      "item": [
+        {
+          "name": "Create Course",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjE0NzU1OSwiZXhwIjoxNzgyNzUyMzU5fQ.pgNDOIIDmWjO0vLnYoXUqX2NcrxUal8Ro0Nma4QW5XU",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "courseTitle",
+                  "value": "Samosa",
+                  "type": "text",
+                  "uuid": "f73f839b-dea0-4b06-be89-6af24a879365"
+                },
+                {
+                  "key": "courseShortDescription",
+                  "value": "Samosa kaise banaye.",
+                  "type": "text",
+                  "uuid": "ab0d3a8c-cdbf-425b-8a91-a0ac7485ea21"
+                },
+                {
+                  "key": "price",
+                  "value": "290",
+                  "type": "text",
+                  "uuid": "07169e0e-df6b-4208-b061-32b7faa19f27"
+                },
+                {
+                  "key": "category",
+                  "value": "Physcology",
+                  "type": "text",
+                  "uuid": "3b45c0c3-6ca7-4318-847e-32e44345c3bc"
+                },
+                {
+                  "key": "benefitsOfCourse",
+                  "value": "Sab Kuch hai.",
+                  "type": "text",
+                  "uuid": "67b0d17b-5653-4103-ba38-e6be6937fcfa"
+                },
+                {
+                  "key": "requirements",
+                  "value": "Nothing",
+                  "type": "text",
+                  "uuid": "14d769b8-af5e-469a-9b3d-be9a97028d6a"
+                },
+                {
+                  "key": "courseThumbnail",
+                  "type": "file",
+                  "uuid": "19b8d35c-c887-4e63-a12b-9adc4cde6a3a",
+                  "src": "/C:/Users/Pratik Nimbalkar/Desktop/samosa (1).png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/create",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Section",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MzE1ODk5MywiZXhwIjoxNzgzNzYzNzkzfQ.7YK6mrwRYN6sZ1gYY3t4WWUVhZsaC9Vxv2eJqLyZDgA",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"courseId\": \"6a4a73ce309f5b2ebce1c379\",\r\n    \"sectionName\": \"Making dough\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/6a4a774b12f51551bcd1df1a/createSection",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "6a4a774b12f51551bcd1df1a",
+                "createSection"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Sub Section",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjRiZTlkMmU4ZDVmNDI0Mjg0YzIyNyIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4NDk5MDA1NCwiZXhwIjoxNzg1NTk0ODU0fQ.VHVdxSGJLLO1Skygta2YU516fHViGVYCqEBpYbe3wF4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjkyNDYzOCwiZXhwIjoxNzgzNTI5NDM4fQ.GGKyyGH2WoF90dUWEMUSfvwPM4Hm3RXNk_8H5H-rBfk",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "sectionId",
+                  "value": "6a64c9a6e389c05668e83ad4",
+                  "type": "text",
+                  "uuid": "fd9844f5-e7e7-4843-8086-75ffbff5fca7",
+                  "disabled": true
+                },
+                {
+                  "key": "title",
+                  "value": "srs",
+                  "type": "text",
+                  "uuid": "da4e1031-51a8-465d-872b-c0d5b1109df3"
+                },
+                {
+                  "key": "description",
+                  "value": "I am not okay.",
+                  "type": "text",
+                  "uuid": "a6c2f9ef-ebf2-4d12-8d49-9b25468e6efb"
+                },
+                {
+                  "key": "timeDuration",
+                  "value": "400",
+                  "type": "text",
+                  "uuid": "40374685-568b-47e0-bd7b-4782c4bfd928"
+                },
+                {
+                  "key": "videoUrl",
+                  "type": "file",
+                  "uuid": "99630298-a552-4a79-ad0b-82ba3c8b1b8a",
+                  "src": "postman-cloud:///1f1778ea-6f17-4760-b6f1-fb2293d9e405"
+                }
+              ]
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/6a64c9d9e389c05668e83ad5/createSubSection",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "6a64c9d9e389c05668e83ad5",
+                "createSubSection"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Course",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MzI2NDIyOSwiZXhwIjoxNzgzODY5MDI5fQ.VH53ExmAftNn8n2ZHAXw36cReFjLz7lM3GGlSzQtHgE",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/6a4a774b12f51551bcd1df1a/coursePublish",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "6a4a774b12f51551bcd1df1a",
+                "coursePublish"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjY1ODM5MSwiZXhwIjoxNzgzMjYzMTkxfQ.vTs6jft3uy3nbpP6ooLB4-7krEker5PhZQl5C5ABVz0",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/deleteCourse/6a48e9a0da83893c1127136b",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "deleteCourse",
+                "6a48e9a0da83893c1127136b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Course",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MzE1ODk5MywiZXhwIjoxNzgzNzYzNzkzfQ.7YK6mrwRYN6sZ1gYY3t4WWUVhZsaC9Vxv2eJqLyZDgA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjY1ODM5MSwiZXhwIjoxNzgzMjYzMTkxfQ.vTs6jft3uy3nbpP6ooLB4-7krEker5PhZQl5C5ABVz0",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "courseTitle",
+                  "value": "DOSA",
+                  "type": "text",
+                  "uuid": "f73f839b-dea0-4b06-be89-6af24a879365"
+                },
+                {
+                  "key": "courseShortDescription",
+                  "value": "Samosa kaise banaye.",
+                  "type": "text",
+                  "uuid": "1609e693-4d47-4e6c-8c58-c5d5f9333c35"
+                },
+                {
+                  "key": "price",
+                  "value": "290",
+                  "type": "text",
+                  "uuid": "07169e0e-df6b-4208-b061-32b7faa19f27"
+                },
+                {
+                  "key": "category",
+                  "value": "Physcology",
+                  "type": "text",
+                  "uuid": "07169e0e-df6b-4208-b061-32b7faa19f27"
+                },
+                {
+                  "key": "benefitsOfCourse",
+                  "value": "Mythology",
+                  "type": "text",
+                  "uuid": "07169e0e-df6b-4208-b061-32b7faa19f27"
+                },
+                {
+                  "key": "requirements",
+                  "value": "everything",
+                  "type": "text",
+                  "uuid": "07169e0e-df6b-4208-b061-32b7faa19f27"
+                },
+                {
+                  "key": "courseThumbnail",
+                  "type": "file",
+                  "uuid": "df6805be-fbc0-4d58-af99-1aeb381e38d3",
+                  "src": "postman-cloud:///1f1778ea-6f17-4760-b6f1-fb2293d9e405"
+                }
+              ]
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/6a4a774b12f51551bcd1df1a/editCourse",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "6a4a774b12f51551bcd1df1a",
+                "editCourse"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Subsection",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{json_web_token_030r}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"sectionName\" :\"dhgad\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/6a4a774b12f51551bcd1df1a/editSection/6a4a7a7d04e479ba26133d58",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "6a4a774b12f51551bcd1df1a",
+                "editSection",
+                "6a4a7a7d04e479ba26133d58"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Section",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MzE1ODk5MywiZXhwIjoxNzgzNzYzNzkzfQ.7YK6mrwRYN6sZ1gYY3t4WWUVhZsaC9Vxv2eJqLyZDgA",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/deleteSection/6a4e627bf4c21d2237428d12",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "deleteSection",
+                "6a4e627bf4c21d2237428d12"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Fetch Course By ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjY1ODM5MSwiZXhwIjoxNzgzMjYzMTkxfQ.vTs6jft3uy3nbpP6ooLB4-7krEker5PhZQl5C5ABVz0",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/getCourse/6a3d54fbf3b3b8b85cd96c4b",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "getCourse",
+                "6a3d54fbf3b3b8b85cd96c4b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Courses",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzk2NmQ3MDgxMjhjODcyMDI4NjI4MSIsImVtYWlsIjoia2FyYW5kZUdhbmVzaEBnbWFpbC5jb20iLCJyb2xlIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTc4MjY1ODM5MSwiZXhwIjoxNzgzMjYzMTkxfQ.vTs6jft3uy3nbpP6ooLB4-7krEker5PhZQl5C5ABVz0",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/instructor/course/getCourses",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "instructor",
+                "course",
+                "getCourses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Routes",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_153k}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:4000/edtech/profile/users",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "profile",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "StudentRoutes",
+      "item": [
+        {
+          "name": "Enroll Course",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"role\": \"Instructor\",\r\n    \"email\": \"sasas@gmail.com\",\r\n    \"password\":\"Dev@dsdsdsd\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/student/enroll",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "student",
+                "enroll"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Enrolled Course By Student",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_0tgi}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"role\": \"Instructor\",\r\n    \"email\": \"sasas@gmail.com\",\r\n    \"password\":\"Dev@dsdsdsd\"\r\n}"
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/student/getEnrolledCourses",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "student",
+                "getEnrolledCourses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Course from enrolled courses",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjRiZDdjNzAyYmQxZGQwNjk2NTU3ZCIsImVtYWlsIjoiZ2FuZXNoS2FyYW5kZUBnbWFpbC5jb20iLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc4NTU2MzMwMCwiZXhwIjoxNzg2MTY4MTAwfQ.aekQ8yLH-I9-CadIMgCCQbpZZ2X4pSl-QoVoMM_Sm88",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"role\": \"Instructor\",\r\n    \"email\": \"sasasas@gmail.com\",\r\n    \"password\":\"Dev@wuifjwfnwj\"\r\n}"
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/student/removeCourse",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "student",
+                "removeCourse"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Progress of enrolled course",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjRiZDdjNzAyYmQxZGQwNjk2NTU3ZCIsImVtYWlsIjoiZ2FuZXNoS2FyYW5kZUBnbWFpbC5jb20iLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc4NTY4NDAyNSwiZXhwIjoxNzg2Mjg4ODI1fQ.m9MtLUnxNgBsYUZzQ53_HZ5zPbRFAt2p3PpblCusyOo",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"courseId\":\"6a64c97fe389c05668e83ad3\",\r\n    \"subSectionId\":\"6a64c9e3e389c05668e83ad6\",\r\n    \"currentTime\":120000\r\n\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/student/course/progress",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "student",
+                "course",
+                "progress"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Review Routes",
+      "item": [
+        {
+          "name": "Add review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjRiZDdjNzAyYmQxZGQwNjk2NTU3ZCIsImVtYWlsIjoiZ2FuZXNoS2FyYW5kZUBnbWFpbC5jb20iLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc4NTY4NDAyNSwiZXhwIjoxNzg2Mjg4ODI1fQ.m9MtLUnxNgBsYUZzQ53_HZ5zPbRFAt2p3PpblCusyOo",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"courseId\":\"6a64c97fe389c05668e83ad3\",\r\n    \"rating\":2,\r\n    \"review\":\"It is best\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:4000/edtech/reviews/addreview",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "edtech",
+                "reviews",
+                "addreview"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "json_web_token_030r",
+      "secret": true
+    },
+    {
+      "key": "bearer_token_064s",
+      "secret": true
+    },
+    {
+      "key": "supabase_service_role_api_key_0tgi",
+      "secret": true
+    },
+    {
+      "key": "auth_secret_153k",
+      "secret": true
+    }
+  ]
+}
