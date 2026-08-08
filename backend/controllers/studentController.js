@@ -1,6 +1,9 @@
 const User = require("../models/userModel");
 const Course = require("../models/courseModel")
 const CourseProgress = require("../models/courseProgress")
+const SubSection = require("../models/subSectionModel")
+const { sendEnrollmentEmail } = require("../utils/enrollmentEmail");
+const { errorMonitor } = require("nodemailer/lib/xoauth2");
 
 
 exports.enrollCourses = async (req, res) => {
@@ -25,48 +28,65 @@ exports.enrollCourses = async (req, res) => {
             });
         }
 
+        // Store courses that are newly enrolled
+        const enrolledCourses = [];
+
+        console.log("Course IDs received:", courseIds);
+        console.log("User courses:", user.courses);
+
         for (const courseId of courseIds) {
 
+            console.log("Processing course:", courseId);
 
             const alreadyEnrolled = user.courses.find(course =>
                 course.toString() === courseId
-            )
+            );
+
+            console.log("Already enrolled:", alreadyEnrolled);
 
             if (alreadyEnrolled) {
-                continue; // if not continue other courses will not be added
+                console.log("SKIPPED - already enrolled:", courseId);
+                continue;
             }
+
             const course = await Course.findById(courseId);
 
-
-
-
+            console.log("Course found:", course);
 
             if (!course) {
-                continue // same other courses will not be handled or added in enrolledstudent in course model
+                console.log("SKIPPED - course not found:", courseId);
+                continue;
             }
-
 
             user.courses.push(courseId);
+
             course.studentsEnrolled.push(studentId);
+
             await course.save();
 
-            // Create Course Progress
-            const progress = await CourseProgress.findOne({
-                student: studentId,
-                course: courseId
-            });
+            // ...
 
-            if (!progress) {
-                await CourseProgress.create({
-                    student: studentId,
-                    course: courseId,
-                    lectureProgress: []
-                });
-            }
+            enrolledCourses.push(course);
 
+            console.log("Added to email list:", course.courseTitle);
         }
 
+        console.log(enrolledCourses);
+
         await user.save();
+
+        // Send email only if at least one new course was enrolled
+        if (enrolledCourses.length > 0) {
+            console.log("Sending enrollment email to:", user.email);
+
+            await sendEnrollmentEmail({
+                email: user.email,
+                studentName: `${user.firstName} ${user.lastName}`,
+                courses: enrolledCourses
+            });
+
+            console.log("Enrollment email sent successfully");
+        }
 
 
         return res.status(200).json({
@@ -79,7 +99,8 @@ exports.enrollCourses = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: `Something went wrong while enrolling `
+            message: `Something went wrong while enrolling `,
+            error: error.message
         })
     }
 }
@@ -258,6 +279,73 @@ exports.removeCourse = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: `Something went wrong while removing course for user`,
+            error: error.message
+        })
+    }
+}
+
+// Update Course Progress
+
+exports.updateCourseProgress = async (req, res) => {
+    try {
+        const { courseId, subSectionId, currentTime } = req.body;
+        const studentId = req.user.id;
+
+        const subSection = await SubSection.findById(subSectionId);
+
+        if (!subSection) {
+            return res.status(404).json({
+                success: false,
+                message: "Lecture not found"
+            });
+        }
+
+        const safeCurrentTime = Math.min(currentTime, subSection.timeDuration);
+
+        const courseProgress = await CourseProgress.findOne({
+            student: studentId,
+            course: courseId
+        });
+
+        if (!courseProgress) {
+            return res.status(404).json({
+                success: false,
+                message: "Course Progress not found."
+            })
+        }
+
+
+        const lecture = courseProgress.lectureProgress.find(
+            item => item.subSection.toString() === subSectionId
+        );
+
+        if (!lecture) {
+            courseProgress.lectureProgress.push({
+                subSection: subSectionId,
+                currentTime: safeCurrentTime,
+                completed: false
+            });
+        } else {
+            lecture.currentTime = safeCurrentTime;
+            lecture.completed = safeCurrentTime >= subSection.timeDuration;
+        }
+
+
+
+        await courseProgress.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Course progress updated successfully.",
+            data: courseProgress
+        });
+
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `Something went wrong while updating course progress`,
             error: error.message
         })
     }
