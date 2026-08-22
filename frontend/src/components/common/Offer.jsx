@@ -1,4 +1,4 @@
-मम्मी लाउकर हालांकि, लेकिन शायद आपको यदि पता है कि पहली दुनिया की जरूरसिर आपको पूरी तरह से न कहीं सच्चेनोटिसनimport React from "react";
+import React from "react";
 
 const Offer = () => {
   return (

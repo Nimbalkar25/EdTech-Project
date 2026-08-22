@@ -5,7 +5,7 @@ import Approutes from "./routes/Approutes";
 
 function App() {
     return (
-        <div className="w-full h-screen bg-[rgba(0,8,20,1)]">
+        <div className="w-full min-h-screen bg-[rgba(0,8,20,1)]">
             <BrowserRouter>
                 <Offer />
                 <Navbar />
