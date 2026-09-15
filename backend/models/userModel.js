@@ -100,10 +100,25 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordExpires: {
         type: Date,
-    }
+    },
+    // ================= Brute-Force & Account Lockout Fields ================= //
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+    lockUntil: {
+      type: Date,
+      select: false,
+    },
 
 },
     { timestamps: true }
 );
+
+// Virtual property to check if the account is currently locked
+userSchema.virtual("isLocked").get(function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
 
 module.exports = mongoose.model('USER', userSchema)

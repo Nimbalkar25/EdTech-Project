@@ -89,70 +89,109 @@ exports.registerUser = async (req, res) => {
 // Login User
 
 exports.loginUser = async (req, res) => {
-    try {
+  try {
+    const { role, email, password } = req.body;
 
-        const { role, email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(404).json({
-                success: false,
-                message: "Please enter Email and Password"
-            })
-        }
-
-        const existingUser = await User.findOne({ email }).select("+password");
-        // as in schema we select false so it will not give password we need to .select('+password') to get the password this tells mongodb to explicitly give password
-
-        if (!existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: `User not exists with the email ${email}. Please register..`
-            })
-        }
-
-        if (!existingUser.emailVerified) {
-            return res.status(401).json({
-                success: false,
-                message: "Please verify your email first"
-            });
-        }
-        const passwordMatch = await bcrypt.compare(password, existingUser.password);
-
-        if (!passwordMatch) {
-            return res.status(400).json({
-                success: false,
-                message: `Wrong Password. Please enter correct password.`
-            })
-        }
-
-        if (role.toLowerCase() !== (existingUser.role).toLowerCase()) {
-            return res.status(400).json({
-                success: false,
-                message: `Role is mismatched Select correct role.`
-            })
-
-        }
-
-        const token = await generateToken(existingUser, "7d");
-
-        existingUser.password = undefined; // to not give password to anyone 
-        res.status(200).json({
-            success: true,
-            message: `Login Successfully. Welcome to StudyNotion...`,
-            token,
-            data: existingUser
-        })
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: error.message,
-            message: "Errror while Login..."
-        })
-
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter Email and Password",
+      });
     }
 
-}
+    // 1. Fetch user including password, failedLoginAttempts, and lockUntil
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() }).select(
+      "+password +failedLoginAttempts +lockUntil"
+    );
+
+    if (!existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: `User does not exist with the email ${email}. Please register.`,
+      });
+    }
+
+    // 2. Check if the account is currently locked
+    if (existingUser.lockUntil && existingUser.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil(
+        (existingUser.lockUntil - Date.now()) / (60 * 1000)
+      );
+      return res.status(423).json({
+        success: false,
+        message: `Account is temporarily locked due to excessive failed attempts. Please try again in ${remainingMinutes} minute(s).`,
+      });
+    }
+
+    // 3. Email verification check
+    if (!existingUser.emailVerified) {
+      return res.status(401).json({
+        success: false,
+        message: "Please verify your email first",
+      });
+    }
+
+    // 4. Validate password
+    const passwordMatch = await bcrypt.compare(password, existingUser.password);
+
+    if (!passwordMatch) {
+      const attempts = (existingUser.failedLoginAttempts || 0) + 1;
+      const updates = { failedLoginAttempts: attempts };
+
+      // Trigger a 15-minute lock after 5 consecutive failures
+      if (attempts >= 5) {
+        updates.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+        updates.failedLoginAttempts = 0; // Reset counter for the next cycle
+      }
+
+      await User.findByIdAndUpdate(existingUser._id, updates);
+
+      const attemptsLeft = Math.max(0, 5 - attempts);
+      return res.status(401).json({
+        success: false,
+        message:
+          attemptsLeft > 0
+            ? `Wrong Password. You have ${attemptsLeft} attempt(s) left before account lockout.`
+            : "Account has been locked for 15 minutes due to too many failed attempts.",
+      });
+    }
+
+    // 5. Role check
+    if (role && role.toLowerCase() !== existingUser.role.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: "Role is mismatched. Select correct role.",
+      });
+    }
+
+    // 6. Reset lock and counter on successful login
+    if (existingUser.failedLoginAttempts > 0 || existingUser.lockUntil) {
+      await User.findByIdAndUpdate(existingUser._id, {
+        failedLoginAttempts: 0,
+        lockUntil: null,
+      });
+    }
+
+    // 7. Issue token and return user data
+    const token = await generateToken(existingUser, "7d");
+
+    existingUser.password = undefined;
+    existingUser.failedLoginAttempts = undefined;
+    existingUser.lockUntil = undefined;
+
+    return res.status(200).json({
+      success: true,
+      message: "Login Successfully. Welcome to StudyNotion...",
+      token,
+      data: existingUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "Error while Login...",
+    });
+  }
+};
 
 
 
