@@ -9,7 +9,7 @@ const { generateToken } = require("../utils/tokenService");
 // Register User
 exports.registerUser = async (req, res) => {
     try {
-        const { firstName, lastName,gender, email, countrycode, phoneNumber, password, confirmPassword, role } = req.body;
+        const { firstName, lastName, gender, email, countrycode, phoneNumber, password, confirmPassword, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -31,6 +31,15 @@ exports.registerUser = async (req, res) => {
                 success: false,
                 message: "Please check confirm password do not match the password."
             })
+        }
+
+        // Validate plain password with regex BEFORE hashing
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be at least 8 characters long."
+            });
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
@@ -116,7 +125,7 @@ exports.loginUser = async (req, res) => {
             })
         }
 
-        if (role !== existingUser.role) {
+        if (role.toLowerCase() !== (existingUser.role).toLowerCase()) {
             return res.status(400).json({
                 success: false,
                 message: `Role is mismatched Select correct role.`
@@ -528,27 +537,27 @@ exports.deleteAccount = async (req, res) => {
         };
 
         const user = await User.findById(userId).select("+password");
-        if(!user){
+        if (!user) {
             return res.status(400).json({
-                success:false,
-                message:`User not Found..`
+                success: false,
+                message: `User not Found..`
             })
         }
 
         const passwordMatch = await bcrypt.compare(enteredPassword, user.password);
 
-        if(!passwordMatch){
+        if (!passwordMatch) {
             return res.status(400).json({
-                success:false,
-                message:`Password is Incorrect`
+                success: false,
+                message: `Password is Incorrect`
             })
         }
 
         await User.findByIdAndDelete(userId);
 
         return res.status(200).json({
-            success:true,
-            message:`Account deleted successfully..`
+            success: true,
+            message: `Account deleted successfully..`
         })
 
 

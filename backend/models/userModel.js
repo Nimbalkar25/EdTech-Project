@@ -34,11 +34,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Please enter your password"],
-        minlength: [8, "Password should be at least 8 characters long"],
-        match: [
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-            "Password must contain at least 1 uppercase letter, 1 lowercase letter and 1 number"
-        ],
+        trim: true,
         select: false,
     },
     role: {
@@ -71,9 +67,8 @@ const userSchema = new mongoose.Schema({
     },
 
     gender: {
-        required:true,
         type: String,
-        enum: ["Male", "Female", "Other"]
+        enum: ["Male", "Female", "Other"],
     },
 
     dateOfBirth: {
