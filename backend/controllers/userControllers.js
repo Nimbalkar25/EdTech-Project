@@ -71,7 +71,7 @@ exports.registerUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: `Please verify email with Otp Sent to registered email.`,
-            data: userSaved
+            
         })
     } catch (error) {
         return res.status(500).json({
@@ -224,6 +224,8 @@ exports.verifyEmail = async (req, res) => {
             });
         }
 
+        const token = await generateToken(existingUser, "7d");
+
         existingUser.emailVerified = true;
         existingUser.otp = undefined;
         existingUser.otpExpires = undefined;
@@ -232,7 +234,9 @@ exports.verifyEmail = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Email verified successfully"
+            message: "Email verified successfully",
+            token:token,
+            data:existingUser
         });
 
     } catch (error) {
