@@ -71,7 +71,7 @@ exports.registerUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: `Please verify email with Otp Sent to registered email.`,
-            
+
         })
     } catch (error) {
         return res.status(500).json({
@@ -88,164 +88,246 @@ exports.registerUser = async (req, res) => {
 
 // Login User
 
+// exports.loginUser
 exports.loginUser = async (req, res) => {
-  try {
-    const { role, email, password } = req.body;
+    try {
+        const { role, email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter Email and Password",
-      });
+        // 1. Basic validation
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide both email and password.",
+            });
+        }
+
+        // 2. Sanitize email input
+        const sanitizedEmail = email.toLowerCase().trim();
+
+        // 3. Fetch user with sensitive security fields explicitly included
+        const existingUser = await User.findOne({ email: sanitizedEmail }).select(
+            "+password +failedLoginAttempts +lockUntil"
+        );
+
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: `No account found with ${email}. Please register first.`,
+            });
+        }
+        if (!existingUser.emailVerified) {
+
+            // Generate and send a fresh OTP so they aren't stuck with an expired one
+            const newOtp = await otpService.generateOtp(existingUser.email);
+
+            existingUser.otp = newOtp;
+            existingUser.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+            await existingUser.save();
+
+            return res.status(403).json({
+                success: false,
+                emailVerified: false,   
+                email: existingUser.email,
+                message: "Your email is not verified. A new verification OTP has been sent to your email.",
+            });
+        }
+
+
+        // 4. Check if account is currently locked out
+        if (existingUser.lockUntil && existingUser.lockUntil > Date.now()) {
+            const remainingMinutes = Math.ceil(
+                (existingUser.lockUntil - Date.now()) / (60 * 1000)
+            );
+            return res.status(423).json({
+                success: false,
+                message: `Account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
+            });
+        }
+
+        // 5. Role validation (Checked before bcrypt to save expensive CPU hashing cycles)
+        if (role && role.toLowerCase() !== existingUser.role.toLowerCase()) {
+            return res.status(400).json({
+                success: false,
+                message: `Account role mismatch. Please select the correct role (${existingUser.role}).`,
+            });
+        }
+
+        // 6. Email verification check (includes flag for frontend redirection)
+        if (!existingUser.emailVerified) {
+            return res.status(403).json({
+                success: false,
+                isUnverified: true,
+                email: existingUser.email,
+                message: "Your email is not verified. Please verify your email before logging in.",
+            });
+        }
+
+        // 7. Validate password
+        const isPasswordMatch = await bcrypt.compare(password, existingUser.password);
+
+        if (!isPasswordMatch) {
+            const attempts = (existingUser.failedLoginAttempts || 0) + 1;
+            const updates = { failedLoginAttempts: attempts };
+
+            // Lock account for 15 minutes after 5 failed attempts
+            if (attempts >= 5) {
+                updates.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+                updates.failedLoginAttempts = 0; // Reset counter for next lock cycle
+            }
+
+            await User.findByIdAndUpdate(existingUser._id, updates);
+
+            const attemptsLeft = Math.max(0, 5 - attempts);
+            return res.status(401).json({
+                success: false,
+                message:
+                    attemptsLeft > 0
+                        ? `Incorrect password. You have ${attemptsLeft} attempt(s) remaining.`
+                        : "Too many failed attempts. Your account has been locked for 15 minutes.",
+            });
+        }
+
+        // 8. Clear lockout states upon successful password validation
+        if (existingUser.failedLoginAttempts > 0 || existingUser.lockUntil) {
+            await User.findByIdAndUpdate(existingUser._id, {
+                failedLoginAttempts: 0,
+                lockUntil: null,
+            });
+        }
+
+        // 9. Generate JWT authentication token
+        const token = await generateToken(existingUser, "7d");
+
+        // 10. Clean user object before sending (convert from Mongoose doc to plain object)
+        const userData = existingUser.toObject();
+        delete userData.password;
+        delete userData.failedLoginAttempts;
+        delete userData.lockUntil;
+
+        // 11. Optional HttpOnly cookie setup for enhanced production security
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        };
+
+        return res
+            .cookie("token", token, cookieOptions)
+            .status(200)
+            .json({
+                success: true,
+                message: "Login successful! Welcome to StudyNotion.",
+                token,
+                data: userData,
+            });
+    } catch (error) {
+        console.error("Login Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred during login. Please try again later.",
+            error: error.message,
+        });
     }
-
-    // 1. Fetch user including password, failedLoginAttempts, and lockUntil
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() }).select(
-      "+password +failedLoginAttempts +lockUntil"
-    );
-
-    if (!existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: `User does not exist with the email ${email}. Please register.`,
-      });
-    }
-
-    // 2. Check if the account is currently locked
-    if (existingUser.lockUntil && existingUser.lockUntil > Date.now()) {
-      const remainingMinutes = Math.ceil(
-        (existingUser.lockUntil - Date.now()) / (60 * 1000)
-      );
-      return res.status(423).json({
-        success: false,
-        message: `Account is temporarily locked due to excessive failed attempts. Please try again in ${remainingMinutes} minute(s).`,
-      });
-    }
-
-    // 3. Email verification check
-    if (!existingUser.emailVerified) {
-      return res.status(401).json({
-        success: false,
-        message: "Please verify your email first",
-      });
-    }
-
-    // 4. Validate password
-    const passwordMatch = await bcrypt.compare(password, existingUser.password);
-
-    if (!passwordMatch) {
-      const attempts = (existingUser.failedLoginAttempts || 0) + 1;
-      const updates = { failedLoginAttempts: attempts };
-
-      // Trigger a 15-minute lock after 5 consecutive failures
-      if (attempts >= 5) {
-        updates.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-        updates.failedLoginAttempts = 0; // Reset counter for the next cycle
-      }
-
-      await User.findByIdAndUpdate(existingUser._id, updates);
-
-      const attemptsLeft = Math.max(0, 5 - attempts);
-      return res.status(401).json({
-        success: false,
-        message:
-          attemptsLeft > 0
-            ? `Wrong Password. You have ${attemptsLeft} attempt(s) left before account lockout.`
-            : "Account has been locked for 15 minutes due to too many failed attempts.",
-      });
-    }
-
-    // 5. Role check
-    if (role && role.toLowerCase() !== existingUser.role.toLowerCase()) {
-      return res.status(400).json({
-        success: false,
-        message: "Role is mismatched. Select correct role.",
-      });
-    }
-
-    // 6. Reset lock and counter on successful login
-    if (existingUser.failedLoginAttempts > 0 || existingUser.lockUntil) {
-      await User.findByIdAndUpdate(existingUser._id, {
-        failedLoginAttempts: 0,
-        lockUntil: null,
-      });
-    }
-
-    // 7. Issue token and return user data
-    const token = await generateToken(existingUser, "7d");
-
-    existingUser.password = undefined;
-    existingUser.failedLoginAttempts = undefined;
-    existingUser.lockUntil = undefined;
-
-    return res.status(200).json({
-      success: true,
-      message: "Login Successfully. Welcome to StudyNotion...",
-      token,
-      data: existingUser,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-      message: "Error while Login...",
-    });
-  }
 };
 
 
 
 // verify Otp Controller 
 
+// exports.verifyEmail
 exports.verifyEmail = async (req, res) => {
-
     try {
         const { email, otp } = req.body;
 
-        const existingUser = await User.findOne({ email }).select("+otp +otpExpires");
+        // 1. Validate required fields
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and OTP are both required.",
+            });
+        }
+
+        // 2. Normalize email format to match registration logic
+        const sanitizedEmail = email.toLowerCase().trim();
+
+        // 3. Find user and explicitly select hidden sensitive fields (+otp, +otpExpires)
+        const existingUser = await User.findOne({ email: sanitizedEmail }).select(
+            "+otp +otpExpires +password"
+        );
 
         if (!existingUser) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "User not found. Please register first.",
             });
         }
 
-        if (existingUser.otp !== otp) {
+        // 4. Guard against re-verification if account is already verified
+        if (existingUser.emailVerified) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid OTP"
+                message: "This account has already been verified. Please log in.",
             });
         }
-        if (existingUser.otpExpires < Date.now()) {
+
+        // 5. Verify OTP expiration before checking equality
+        if (!existingUser.otpExpires || existingUser.otpExpires < Date.now()) {
             return res.status(400).json({
                 success: false,
-                message: "OTP expired"
+                message: "OTP has expired. Please request a new verification code.",
             });
         }
 
-        const token = await generateToken(existingUser, "7d");
+        // 6. Validate OTP value (cast to String and trim to avoid type-mismatch bugs)
+        if (String(existingUser.otp).trim() !== String(otp).trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP. Please check the code and try again.",
+            });
+        }
 
+        // 7. Update verification status and wipe temporary OTP credentials
         existingUser.emailVerified = true;
         existingUser.otp = undefined;
         existingUser.otpExpires = undefined;
 
+        // Persist verified state to database first
         await existingUser.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Email verified successfully",
-            token:token,
-            data:existingUser
-        });
+        // 8. Generate auth token for auto-login / immediate session
+        const token = await generateToken(existingUser, "7d");
 
+        // 9. Sanitize user data before sending in the response payload
+        const userData = existingUser.toObject();
+        delete userData.password;
+        delete userData.otp;
+        delete userData.otpExpires;
+
+        // 10. (Optional) Set HttpOnly cookie for production cookie-based auth
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+        };
+
+        return res
+            .cookie("token", token, cookieOptions)
+            .status(200)
+            .json({
+                success: true,
+                message: "Email verified successfully! Welcome to StudyNotion.",
+                token,
+                data: userData,
+            });
     } catch (error) {
-
+        console.error("Verify Email Error:", error);
         return res.status(500).json({
             success: false,
-            message: error.message
+            message: "An error occurred while verifying the email. Please try again.",
+            error: error.message,
         });
-
     }
 };
 

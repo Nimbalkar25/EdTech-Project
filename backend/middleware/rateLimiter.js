@@ -1,12 +1,8 @@
 // middleware/rateLimiter.js
 const Redis = require("ioredis");
-
-// Fallback to localhost if process.env.REDIS_URL is not set
 const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
 
-redis.on("error", (err) => {
-  console.error("Redis connection error:", err.message);
-});
+redis.on("error", (err) => console.error("Redis connection error:", err.message));
 
 const slidingWindowLimiter = ({
   windowMs = 60 * 1000,
@@ -15,49 +11,54 @@ const slidingWindowLimiter = ({
 } = {}) => {
   return async (req, res, next) => {
     try {
-      // 1. Identify user: Use user ID if authenticated, else IP address
-      const identifier =
-        req.user?._id?.toString() ||
-        req.ip ||
-        req.headers["x-forwarded-for"] ||
-        "anonymous";
+
+      if (process.env.NODE_ENV === "development") {
+        return next(); // Bypasses limiter completely during local frontend testing
+      }
+      const forwarded = req.headers["x-forwarded-for"];
+      const clientIp = forwarded ? forwarded.split(",")[0].trim() : req.ip;
+      const identifier = req.user?._id?.toString() || clientIp || "anonymous";
 
       const key = `${keyPrefix}:${identifier}`;
       const now = Date.now();
       const windowStart = now - windowMs;
       const ttlSeconds = Math.ceil(windowMs / 1000);
 
-      // 2. Atomic pipeline execution in Redis
+      // Clean old timestamps and count active requests
       const results = await redis
         .multi()
-        .zremrangebyscore(key, 0, windowStart) // Prune expired timestamps
-        .zcard(key)                            // Count remaining requests
-        .expire(key, ttlSeconds)               // Reset TTL
+        .zremrangebyscore(key, 0, windowStart)
+        .zcard(key)
+        .expire(key, ttlSeconds)
         .exec();
 
-      const currentRequestCount = results[1][1];
+      const currentCount = results[1][1];
 
-      // 3. Response rate-limit headers
-      res.setHeader("X-RateLimit-Limit", max);
-      res.setHeader("X-RateLimit-Remaining", Math.max(0, max - currentRequestCount));
+      // Blocked: find exactly when the oldest request drops out of the window
+      if (currentCount >= max) {
+        const oldestEntry = await redis.zrange(key, 0, 0, "WITHSCORES");
+        let retryAfter = ttlSeconds;
 
-      // 4. Threshold check
-      if (currentRequestCount >= max) {
+        if (oldestEntry?.length >= 2) {
+          const oldestTimestamp = parseInt(oldestEntry[1], 10);
+          retryAfter = Math.max(1, Math.ceil((oldestTimestamp + windowMs - now) / 1000));
+        }
+
         return res.status(429).json({
           success: false,
-          message: `Too many attempts. Allowed: ${max} requests per ${windowMs / 1000}s. Please wait.`,
+          retryAfter, // Exact seconds calculated by backend
+          message: `Too many attempts. Please wait ${retryAfter}s before retrying.`,
         });
       }
 
-      // 5. Record this request with a unique member value
-      const uniqueMember = `${now}:${Math.random().toString(36).substring(2, 8)}`;
+      // Record request
+      const uniqueMember = `${now}:${Math.random().toString(36).slice(2, 8)}`;
       await redis.zadd(key, now, uniqueMember);
 
       next();
     } catch (error) {
-      console.error("Rate limiter middleware error:", error);
-      // Fail-open: don't crash the request flow if Redis drops
-      next();
+      console.error("Rate limiter error:", error);
+      next(); // Fail open so users aren't blocked if Redis stops
     }
   };
 };

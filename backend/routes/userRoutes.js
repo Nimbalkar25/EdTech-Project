@@ -46,14 +46,14 @@ const signupLimiter = slidingWindowLimiter({
 // Password Reset Link: Prevent email flood attacks (Max 3 requests per 10 minutes)
 const resetLinkLimiter = slidingWindowLimiter({
   windowMs: 10 * 60 * 1000,
-  max: 3,
+  max: 5,
   keyPrefix: "reset_link",
 });
 
 // Profile Upload: Limit heavy multipart/avatar uploads (Max 5 uploads per minute)
 const avatarLimiter = slidingWindowLimiter({
   windowMs: 60 * 1000,
-  max: 5,
+  max: 3,
   keyPrefix: "avatar_upload",
 });
 

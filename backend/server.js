@@ -18,7 +18,10 @@ const reviewRoutes = require("./routes/reviewRoutes")
 require("./config/redis");
 dbConnect();
 cloudinaryConnect();
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "https://your-production-frontend.vercel.app"],
+    credentials: true, // Required to allow cookies to travel through CORS
+  }));
 app.use("/edtech",userRoutes);
 app.use("/edtech/instructor",instructorRoutes);
 app.use("/edtech/student",studentRoutes);
