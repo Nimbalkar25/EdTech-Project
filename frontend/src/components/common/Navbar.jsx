@@ -5,10 +5,17 @@ import {
   Search,
   ShoppingCart,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check which page the user is currently on
+  const isLoginPage = location.pathname === "/login" || location.pathname === "/verifyemail";;
+
   return (
-    <nav className="w-full bg-[#161D29] border-b border-[#2C333F] font-normal text-base text-[#DBDDEA]">
+    <nav className="w-full bg-[rgba(0,8,20,1)] border-b border-[#2C333F] font-normal text-base text-[#DBDDEA]">
       <div className="flex items-center justify-between px-4 sm:px-8 lg:px-16 xl:px-30 py-3">
 
         {/* Logo */}
@@ -40,8 +47,8 @@ const Navbar = () => {
           <Search size={20} className="cursor-pointer" />
           <ShoppingCart size={20} className="cursor-pointer" />
 
-          <button className="border border-[#2C333F] px-3 py-2 rounded cursor-pointer">
-            Sign Up
+          <button className="border border-[#2C333F] px-3 py-2 rounded cursor-pointer" onClick={isLoginPage ? ()=> {navigate("/signup")} : ()=> {navigate("/login")}}>
+            {isLoginPage ? `Sign Up`: `Log In`}
           </button>
         </div>
 
