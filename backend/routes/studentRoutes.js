@@ -3,7 +3,6 @@ const { isAuthenticated, isStudent } = require("../middleware/authMiddleware");
 const { slidingWindowLimiter } = require("../middleware/rateLimiter");
 
 const {
-  enrollCourses,
   getEnrolledCourseForStudent,
   removeCourse,
   updateCourseProgress,
@@ -11,12 +10,7 @@ const {
 
 const router = express.Router();
 
-// 1. Enrollment: Strict limit to avoid race conditions or double purchase triggers
-const enrollLimiter = slidingWindowLimiter({
-  windowMs: 60 * 1000,
-  max: 3,
-  keyPrefix: "student_enroll",
-});
+// COurse will be enrolled after succesfull payment 
 
 // 2. Remove course: Destructive action protection
 const removeCourseLimiter = slidingWindowLimiter({
@@ -40,7 +34,6 @@ const getCoursesLimiter = slidingWindowLimiter({
 });
 
 // --- Routes Definition ---
-router.post("/enroll", isAuthenticated, isStudent, enrollLimiter, enrollCourses);
 router.get("/getEnrolledCourses", isAuthenticated, isStudent, getCoursesLimiter, getEnrolledCourseForStudent);
 router.delete("/removeCourse", isAuthenticated, isStudent, removeCourseLimiter, removeCourse);
 router.put("/course/progress", isAuthenticated, isStudent, progressLimiter, updateCourseProgress);

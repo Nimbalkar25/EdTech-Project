@@ -1,109 +1,7 @@
 const User = require("../models/userModel");
 const Course = require("../models/courseModel")
-const CourseProgress = require("../models/courseProgress")
+const CourseProgress = require("../models/courseProgressModel")
 const SubSection = require("../models/subSectionModel")
-const { sendEnrollmentEmail } = require("../utils/enrollmentEmail");
-const { errorMonitor } = require("nodemailer/lib/xoauth2");
-
-
-exports.enrollCourses = async (req, res) => {
-    try {
-        const { courseIds } = req.body;
-        const studentId = req.user.id;
-
-
-        if (!courseIds || courseIds.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Please provide courseIds."
-            });
-        }
-
-        const user = await User.findById(studentId);
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "Student not found."
-            });
-        }
-
-        // Store courses that are newly enrolled
-        const enrolledCourses = [];
-
-        console.log("Course IDs received:", courseIds);
-        console.log("User courses:", user.courses);
-
-        for (const courseId of courseIds) {
-
-            console.log("Processing course:", courseId);
-
-            const alreadyEnrolled = user.courses.find(course =>
-                course.toString() === courseId
-            );
-
-            console.log("Already enrolled:", alreadyEnrolled);
-
-            if (alreadyEnrolled) {
-                console.log("SKIPPED - already enrolled:", courseId);
-                continue;
-            }
-
-            const course = await Course.findById(courseId);
-
-            console.log("Course found:", course);
-
-            if (!course) {
-                console.log("SKIPPED - course not found:", courseId);
-                continue;
-            }
-
-            user.courses.push(courseId);
-
-            course.studentsEnrolled.push(studentId);
-
-            await course.save();
-
-            // ...
-
-            enrolledCourses.push(course);
-
-            console.log("Added to email list:", course.courseTitle);
-        }
-
-        console.log(enrolledCourses);
-
-        await user.save();
-
-        // Send email only if at least one new course was enrolled
-        if (enrolledCourses.length > 0) {
-            console.log("Sending enrollment email to:", user.email);
-
-            await sendEnrollmentEmail({
-                email: user.email,
-                studentName: `${user.firstName} ${user.lastName}`,
-                courses: enrolledCourses
-            });
-
-            console.log("Enrollment email sent successfully");
-        }
-
-
-        return res.status(200).json({
-            success: true,
-            message: `Enrolled Successfully`
-        })
-
-
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: `Something went wrong while enrolling `,
-            error: error.message
-        })
-    }
-}
 
 
 
@@ -327,7 +225,8 @@ exports.updateCourseProgress = async (req, res) => {
             });
         } else {
             lecture.currentTime = safeCurrentTime;
-            lecture.completed = safeCurrentTime >= subSection.timeDuration;
+            // Keep it true if it was already true, otherwise check if they just finished it
+            lecture.completed = lecture.completed || safeCurrentTime >= subSection.timeDuration;
         }
 
 

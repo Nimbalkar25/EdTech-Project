@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const Course = require("../models/courseModel");
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -103,14 +104,20 @@ const userSchema = new mongoose.Schema({
     },
     // ================= Brute-Force & Account Lockout Fields ================= //
     failedLoginAttempts: {
-      type: Number,
-      default: 0,
-      select: false,
+        type: Number,
+        default: 0,
+        select: false,
     },
     lockUntil: {
-      type: Date,
-      select: false,
+        type: Date,
+        select: false,
     },
+    cart: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "COURSE",
+        },
+    ],
 
 },
     { timestamps: true }
@@ -118,7 +125,7 @@ const userSchema = new mongoose.Schema({
 
 // Virtual property to check if the account is currently locked
 userSchema.virtual("isLocked").get(function () {
-  return !!(this.lockUntil && this.lockUntil > Date.now());
+    return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
 module.exports = mongoose.model('USER', userSchema)

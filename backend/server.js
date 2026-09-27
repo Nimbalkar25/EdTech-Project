@@ -14,7 +14,10 @@ const {cloudinaryConnect} = require("./config/cloudinary")
 const userRoutes = require("./routes/userRoutes")
 const instructorRoutes = require("./routes/instructorRoutes")
 const studentRoutes = require("./routes/studentRoutes");
-const reviewRoutes = require("./routes/reviewRoutes")
+const reviewRoutes = require("./routes/reviewRoutes");
+const cartRoutes = require("./routes/cartRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+
 require("./config/redis");
 dbConnect();
 cloudinaryConnect();
@@ -25,7 +28,9 @@ app.use(cors({
 app.use("/edtech",userRoutes);
 app.use("/edtech/instructor",instructorRoutes);
 app.use("/edtech/student",studentRoutes);
-app.use("/edtech/reviews",reviewRoutes)
+app.use("/edtech/reviews",reviewRoutes);
+app.use("/edtech/cart",cartRoutes);
+app.use("/edtech/stripe",paymentRoutes);
 
 app.listen(PORT,()=>{
     console.log(`Server running on ${PORT}`)

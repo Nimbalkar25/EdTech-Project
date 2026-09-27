@@ -15,6 +15,7 @@ const { resetPasswordLink, resetPassword } = require("../controllers/resetPasswo
 const { isAuthenticated, isAdmin } = require("../middleware/authMiddleware");
 const upload = require("../middleware/multer");
 const { slidingWindowLimiter } = require("../middleware/rateLimiter");
+const { contactUs } = require("../controllers/contactUsController");
 
 // 1. Import slidingWindowLimiter
 
@@ -66,6 +67,7 @@ router.post("/verify-otp", otpLimiter, verifyEmail);
 router.post("/resend-otp", otpLimiter, resendOTP);
 router.post("/reset-passwordlink", resetLinkLimiter, resetPasswordLink);
 router.post("/reset-password/:token", loginLimiter, resetPassword);
+router.post("/contact", contactUs,isAuthenticated,contactUs);
 
 // Authenticated Routes (Protected by req.user._id)
 router.get("/profile/users", isAuthenticated, isAdmin, getUsers);
